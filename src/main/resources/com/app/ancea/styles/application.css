@@ -1,0 +1,31 @@
+/*
+
+.series0 {    
+    -fx-stroke-width: 2px;
+    -fx-effect: null;
+-fx-stroke: black;
+-fx-background-color: black, black;
+
+
+}
+ 
+.series1 {    
+    -fx-stroke-width: 2px;
+    -fx-effect: null;
+-fx-stroke: orange;
+-fx-background-color: black, black;
+-fx-shape: "M2,0 L5,4 L8,0 L10,0 L10,2 L6,5 L10,8 L10,10 L8,10 L5,6 L2,
+    10 L0,10 L0,8 L4,5 L0,2 L0,0 Z";
+
+
+}
+
+*/
+
+.tab-label {
+    -fx-content-display: top;
+}
+.tab-pane {
+    -fx-tab-min-height: 30;
+    -fx-tab-max-height: 800;
+}
