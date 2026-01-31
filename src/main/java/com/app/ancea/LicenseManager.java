@@ -443,6 +443,10 @@ public class LicenseManager {
         public String getMessage() { return message; }
         public LocalDate getExpirationDate() { return expirationDate; }
 
+        public LicenseType getTrial() {
+            return LicenseType.TRIAL;
+        }
+
         public boolean isUsable() {
             return type == LicenseType.LICENSED || type == LicenseType.TRIAL;
         }

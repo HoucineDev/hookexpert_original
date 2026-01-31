@@ -32,10 +32,7 @@ public class HardwareFingerprint {
         sb.append("|");
         sb.append(getCpuId());
         sb.append("|");
-        sb.append(getStableMacAddress());
-        sb.append("|");
-        sb.append(getDiskSerial());
-        sb.append("|");
+        // REMOVED: MAC Address and Disk Serial (too volatile)
         sb.append(getStableOsInfo()); // Without user.name for stability
 
         // Hash it to create a fixed-length fingerprint
@@ -43,7 +40,8 @@ public class HardwareFingerprint {
     }
 
     /**
-     * Gets a STABLE MAC address - prefers Ethernet over WiFi, ignores virtual interfaces.
+     * Gets a STABLE MAC address - prefers Ethernet over WiFi, ignores virtual
+     * interfaces.
      */
     private static String getStableMacAddress() {
         try {
@@ -55,8 +53,7 @@ public class HardwareFingerprint {
                 NetworkInterface network = networks.nextElement();
                 byte[] mac = network.getHardwareAddress();
                 String name = network.getName().toLowerCase();
-                String displayName = network.getDisplayName() != null ?
-                        network.getDisplayName().toLowerCase() : "";
+                String displayName = network.getDisplayName() != null ? network.getDisplayName().toLowerCase() : "";
 
                 if (mac != null && mac.length > 0 && !network.isLoopback() && !network.isVirtual()) {
                     // Skip virtual/VPN interfaces
@@ -117,8 +114,7 @@ public class HardwareFingerprint {
             if (os.contains("win")) {
                 // Try PowerShell first (Windows 11 compatible)
                 String result = executePowerShell(
-                        "(Get-CimInstance -ClassName Win32_Processor).ProcessorId"
-                );
+                        "(Get-CimInstance -ClassName Win32_Processor).ProcessorId");
                 if (result.isEmpty()) {
                     // Fallback to WMIC (older Windows)
                     result = executeCommand("wmic cpu get ProcessorId");
@@ -126,8 +122,7 @@ public class HardwareFingerprint {
                 if (result.isEmpty()) {
                     // Last resort: CPU name as identifier
                     result = executePowerShell(
-                            "(Get-CimInstance -ClassName Win32_Processor).Name"
-                    );
+                            "(Get-CimInstance -ClassName Win32_Processor).Name");
                 }
                 return result.isEmpty() ? "NO_CPU_ID" : result;
 
@@ -158,14 +153,12 @@ public class HardwareFingerprint {
             if (os.contains("win")) {
                 // Try PowerShell first (Windows 11 compatible)
                 String result = executePowerShell(
-                        "(Get-CimInstance -ClassName Win32_BaseBoard).SerialNumber"
-                );
+                        "(Get-CimInstance -ClassName Win32_BaseBoard).SerialNumber");
                 if (result.isEmpty() || result.equalsIgnoreCase("To be filled by O.E.M.") ||
                         result.equalsIgnoreCase("Default string")) {
                     // Try BIOS serial as alternative
                     result = executePowerShell(
-                            "(Get-CimInstance -ClassName Win32_BIOS).SerialNumber"
-                    );
+                            "(Get-CimInstance -ClassName Win32_BIOS).SerialNumber");
                 }
                 if (result.isEmpty()) {
                     // Fallback to WMIC
@@ -174,8 +167,7 @@ public class HardwareFingerprint {
                 if (result.isEmpty() || result.equalsIgnoreCase("To be filled by O.E.M.")) {
                     // Use UUID as last resort
                     result = executePowerShell(
-                            "(Get-CimInstance -ClassName Win32_ComputerSystemProduct).UUID"
-                    );
+                            "(Get-CimInstance -ClassName Win32_ComputerSystemProduct).UUID");
                 }
                 return result.isEmpty() ? "NO_MOBO_SERIAL" : result;
 
@@ -187,7 +179,8 @@ public class HardwareFingerprint {
                 return result;
 
             } else if (os.contains("mac")) {
-                return executeCommand("ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformSerialNumber | cut -d'\"' -f4");
+                return executeCommand(
+                        "ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformSerialNumber | cut -d'\"' -f4");
             }
         } catch (Exception e) {
             // Fallback silently
@@ -206,13 +199,11 @@ public class HardwareFingerprint {
             if (os.contains("win")) {
                 // Try PowerShell first (Windows 11 compatible)
                 String result = executePowerShell(
-                        "(Get-CimInstance -ClassName Win32_DiskDrive | Select-Object -First 1).SerialNumber"
-                );
+                        "(Get-CimInstance -ClassName Win32_DiskDrive | Select-Object -First 1).SerialNumber");
                 if (result.isEmpty()) {
                     // Try physical media
                     result = executePowerShell(
-                            "(Get-PhysicalDisk | Select-Object -First 1).SerialNumber"
-                    );
+                            "(Get-PhysicalDisk | Select-Object -First 1).SerialNumber");
                 }
                 if (result.isEmpty()) {
                     // Fallback to WMIC
@@ -293,8 +284,7 @@ public class HardwareFingerprint {
                     "-NoProfile",
                     "-NonInteractive",
                     "-Command",
-                    command
-            );
+                    command);
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
@@ -336,9 +326,9 @@ public class HardwareFingerprint {
             String os = System.getProperty("os.name").toLowerCase();
 
             if (os.contains("win")) {
-                process = Runtime.getRuntime().exec(new String[]{"cmd", "/c", command});
+                process = Runtime.getRuntime().exec(new String[] { "cmd", "/c", command });
             } else {
-                process = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", command});
+                process = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", command });
             }
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

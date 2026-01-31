@@ -19,8 +19,8 @@ public class MultiStorageTrialManager {
     private static final Logger logger = Logger.getLogger(MultiStorageTrialManager.class.getName());
 
     // Configuration - CUSTOMIZE THESE VALUES
-    private static final int TRIAL_DAYS = 14;  // Number of trial days
-    private static final String SECRET_KEY = "HookeXpert2025!SecretKey#@$";
+    private static final int TRIAL_DAYS = 30; // Number of trial days
+    private static final String SECRET_KEY = "HookeXpert2025!SecretKey#2026_Reset";
     private static final String APP_NAME = "HookeXpert";
 
     // Multiple storage providers
@@ -31,8 +31,7 @@ public class MultiStorageTrialManager {
                 new PreferencesStorage(),
                 new HiddenFileStorage(),
                 new TempFolderStorage(),
-                new AppDataStorage()
-        );
+                new AppDataStorage());
     }
 
     /**
@@ -113,11 +112,13 @@ public class MultiStorageTrialManager {
      */
     interface StorageProvider {
         LocalDate readDate() throws Exception;
+
         void writeDate(LocalDate date) throws Exception;
     }
 
     /**
-     * Storage using Java Preferences API (Windows Registry / Linux ~/.java/.userPrefs).
+     * Storage using Java Preferences API (Windows Registry / Linux
+     * ~/.java/.userPrefs).
      */
     class PreferencesStorage implements StorageProvider {
         private final Preferences prefs;
@@ -129,7 +130,8 @@ public class MultiStorageTrialManager {
         @Override
         public LocalDate readDate() {
             String encoded = prefs.get("init_ts", null);
-            if (encoded == null) return null;
+            if (encoded == null)
+                return null;
             return LocalDate.parse(decrypt(encoded));
         }
 
@@ -163,7 +165,8 @@ public class MultiStorageTrialManager {
 
         @Override
         public LocalDate readDate() throws Exception {
-            if (!Files.exists(filePath)) return null;
+            if (!Files.exists(filePath))
+                return null;
             String content = Files.readString(filePath);
             return LocalDate.parse(decrypt(content.trim()));
         }
@@ -198,7 +201,8 @@ public class MultiStorageTrialManager {
 
         @Override
         public LocalDate readDate() throws Exception {
-            if (!Files.exists(filePath)) return null;
+            if (!Files.exists(filePath))
+                return null;
             String content = Files.readString(filePath);
             return LocalDate.parse(decrypt(content.trim()));
         }
@@ -238,7 +242,8 @@ public class MultiStorageTrialManager {
 
         @Override
         public LocalDate readDate() throws Exception {
-            if (!Files.exists(filePath)) return null;
+            if (!Files.exists(filePath))
+                return null;
             String content = Files.readString(filePath);
             return LocalDate.parse(decrypt(content.trim()));
         }
@@ -322,8 +327,16 @@ public class MultiStorageTrialManager {
             this.message = message;
         }
 
-        public boolean isValid() { return valid; }
-        public long getDaysRemaining() { return daysRemaining; }
-        public String getMessage() { return message; }
+        public boolean isValid() {
+            return valid;
+        }
+
+        public long getDaysRemaining() {
+            return daysRemaining;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 }

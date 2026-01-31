@@ -77,7 +77,7 @@ public class Main extends Application {
 
 		System.out.println("License check: " + licenseStatus.getType() + " - " + licenseStatus.getMessage());
 
-		switch (licenseStatus.getType()) {
+		switch (licenseStatus.getTrial()) {
 			case EXPIRED:
 				// Show license dialog - blocks until resolved
 				LicenseDialog dialog = new LicenseDialog(licenseManager);
