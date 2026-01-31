@@ -77,21 +77,11 @@ public class Main extends Application {
 
 		System.out.println("License check: " + licenseStatus.getType() + " - " + licenseStatus.getMessage());
 
-		switch (licenseStatus.getTrial()) {
+		switch (licenseStatus.getType()) {
 			case EXPIRED:
-				// Show license dialog - blocks until resolved
-				LicenseDialog dialog = new LicenseDialog(licenseManager);
-				boolean activated = dialog.showExpiredDialog(null);
-
-				if (!activated) {
-					// User closed without activating - exit app
-					logger.info("Application closed - license required");
-					Platform.exit();
-					return;
-				}
-
-				// Refresh license status after activation
-				licenseStatus = licenseManager.checkLicense();
+				// License check disabled - app opens freely
+				// The user can still enter a license via Help menu
+				logger.info("License expired but app allowed to open");
 				break;
 
 			case TRIAL:
