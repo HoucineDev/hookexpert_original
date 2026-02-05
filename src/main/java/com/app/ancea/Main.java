@@ -42,7 +42,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	private static final String pathLog = String.join(File.separator,  Ressources.pathLogs, "logHookeXpert.log");
+	private static final String pathLog = String.join(File.separator, Ressources.pathLogs, "logHookeXpert.log");
 
 	private static final String APP_VERSION = "1.0.0";
 
@@ -67,40 +67,21 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws Exception {
 
 		// ============================================================
-		// LICENSE CHECK - Must pass before app starts
+		// LICENSE SYSTEM COMPLETELY DISABLED - For fastest app launch
+		// LicenseManager is NOT instantiated to avoid slow HardwareFingerprint
+		// generation (PowerShell/WMIC commands for CPU ID, motherboard, etc.)
 		// ============================================================
-		licenseManager = new LicenseManager();
-		licenseManager.setOnAdminModeChanged(isAdmin -> {
-			Platform.runLater(() -> updateAdminMode(primaryStage, isAdmin));
-		});
-		licenseStatus = licenseManager.checkLicense();
-
-		System.out.println("License check: " + licenseStatus.getType() + " - " + licenseStatus.getMessage());
-
-		switch (licenseStatus.getType()) {
-			case EXPIRED:
-				// License check disabled - app opens freely
-				// The user can still enter a license via Help menu
-				logger.info("License expired but app allowed to open");
-				break;
-
-			case TRIAL:
-				// Show warning if trial ending soon (3 days or less)
-				if (licenseStatus.getDaysRemaining() <= 3) {
-					// Will show after main window appears
-					Platform.runLater(() ->
-							LicenseDialog.showTrialWarning(primaryStage, licenseStatus.getDaysRemaining())
-					);
-				}
-				break;
-
-			case LICENSED:
-				// All good, continue
-				logger.info("Licensed version - proceeding with app launch");
-				break;
-		}
+		licenseManager = null; // Not initialized to skip slow hardware fingerprinting
+		// Set as LICENSED immediately - no validation
+		licenseStatus = new LicenseManager.LicenseStatus(
+				LicenseManager.LicenseType.LICENSED,
+				365L, // Days remaining (avoids trial banners)
+				"License system disabled for fast startup",
+				null // No expiration date
+		);
+		logger.info("License system disabled - app opens immediately");
 		// ============================================================
-		// END LICENSE CHECK
+		// END LICENSE SECTION
 		// ============================================================
 
 		Ressources.ensureDirs();
@@ -148,7 +129,7 @@ public class Main extends Application {
 
 		MenuBar menuBar = init_bar_menu(primaryStage);
 
-//		BorderPane borderPane = new BorderPane();
+		// BorderPane borderPane = new BorderPane();
 
 		mainLayout = new BorderPane();
 		mainLayout.setTop(menuBar);
@@ -158,7 +139,8 @@ public class Main extends Application {
 		// 1. UPDATE THE STATUS BAR LOGIC (Inside start method)
 		// ============================================================
 
-		// Logic: Show banner ONLY if days <= 30 (regardless if it's a Key or Internal Trial)
+		// Logic: Show banner ONLY if days <= 30 (regardless if it's a Key or Internal
+		// Trial)
 		if (licenseStatus.getDaysRemaining() <= 30) {
 			Label trialBanner = new Label();
 
@@ -167,7 +149,8 @@ public class Main extends Application {
 				trialBanner.setText("VERSION D'ESSAI - " + licenseStatus.getDaysRemaining() + " jour(s) restant(s)");
 			} else {
 				// It is a license key, but short term (<= 30 days)
-				trialBanner.setText("LICENCE PROVISOIRE / ESSAI - Expire dans " + licenseStatus.getDaysRemaining() + " jours");
+				trialBanner.setText(
+						"LICENCE PROVISOIRE / ESSAI - Expire dans " + licenseStatus.getDaysRemaining() + " jours");
 			}
 
 			trialBanner.setStyle(
@@ -175,13 +158,13 @@ public class Main extends Application {
 							"-fx-text-fill: white; " +
 							"-fx-font-weight: bold; " +
 							"-fx-padding: 5 10 5 10; " +
-							"-fx-font-size: 12px;"
-			);
+							"-fx-font-size: 12px;");
 			trialBanner.setMaxWidth(Double.MAX_VALUE);
 			trialBanner.setAlignment(Pos.CENTER);
 			mainLayout.setBottom(trialBanner);
 		}
-		// ELSE: If days > 30, we do NOTHING. The bottom of borderPane remains null/empty.
+		// ELSE: If days > 30, we do NOTHING. The bottom of borderPane remains
+		// null/empty.
 
 		Screen screen = Screen.getPrimary();
 		Rectangle2D bounds = screen.getVisualBounds();
@@ -214,18 +197,16 @@ public class Main extends Application {
 		fenetre_durees.prefWidthProperty().bind(mainLayout.widthProperty());
 		fenetre_carte.prefWidthProperty().bind(mainLayout.widthProperty());
 
-
 		// Update title based on license status
 		String titleSuffix = switch (licenseStatus.getType()) {
-            case TRIAL -> " - ESSAI (" + licenseStatus.getDaysRemaining() + " jours)";
-            case LICENSED -> " - Licence activée";
-            default -> "";
-        };
-        primaryStage.setTitle("AnCEA" + titleSuffix);
+			case TRIAL -> " - ESSAI (" + licenseStatus.getDaysRemaining() + " jours)";
+			case LICENSED -> " - Licence activée";
+			default -> "";
+		};
+		primaryStage.setTitle("AnCEA" + titleSuffix);
 
-
-//		primaryStage.setTitle("HookeXpert");
-//		System.out.println("HookeXpert: " + Ressources.LOGO_SAFRAN);
+		// primaryStage.setTitle("HookeXpert");
+		// System.out.println("HookeXpert: " + Ressources.LOGO_SAFRAN);
 
 		// Safe image loading
 		try {
@@ -321,16 +302,17 @@ public class Main extends Application {
 		}
 
 		// FIXED: Access the field directly. No casting required.
-//		if (mainLayout != null && licenseStatus != null) {
-//			if (licenseStatus.getType() == LicenseManager.LicenseType.LICENSED &&
-//					licenseStatus.getDaysRemaining() > 30) {
-//
-//				mainLayout.setBottom(null); // Safely remove trial banner
-//			}
-//		}
+		// if (mainLayout != null && licenseStatus != null) {
+		// if (licenseStatus.getType() == LicenseManager.LicenseType.LICENSED &&
+		// licenseStatus.getDaysRemaining() > 30) {
+		//
+		// mainLayout.setBottom(null); // Safely remove trial banner
+		// }
+		// }
 
 		// CORRECTED: Use the mainLayout field directly.
-		// This replaces the old code that was trying to cast tabPane.getScene().getRoot()
+		// This replaces the old code that was trying to cast
+		// tabPane.getScene().getRoot()
 		if (mainLayout != null && licenseStatus != null) {
 			if (licenseStatus.getType() == LicenseManager.LicenseType.LICENSED &&
 					licenseStatus.getDaysRemaining() > 30) {
@@ -339,15 +321,15 @@ public class Main extends Application {
 			}
 		}
 
-//		// Remove trial banner if present
-//		if (tabPane != null && tabPane.getScene() != null) {
-//			BorderPane root = (BorderPane) tabPane.getScene().getRoot();
-//			if (root != null && licenseStatus != null &&
-//					licenseStatus.getType() == LicenseManager.LicenseType.LICENSED &&
-//					licenseStatus.getDaysRemaining() > 30) {
-//				root.setBottom(null); // Remove trial banner
-//			}
-//		}
+		// // Remove trial banner if present
+		// if (tabPane != null && tabPane.getScene() != null) {
+		// BorderPane root = (BorderPane) tabPane.getScene().getRoot();
+		// if (root != null && licenseStatus != null &&
+		// licenseStatus.getType() == LicenseManager.LicenseType.LICENSED &&
+		// licenseStatus.getDaysRemaining() > 30) {
+		// root.setBottom(null); // Remove trial banner
+		// }
+		// }
 
 		// NO POPUP - The UI updates silently
 		// The user sees [ADMIN] in title and admin buttons appear immediately
@@ -504,37 +486,27 @@ public class Main extends Application {
 
 		// Create the "Enter License" menu item
 		MenuItem itemEnterLicense = new MenuItem("Entrer une licence");
-//		itemEnterLicense.setOnAction(event -> {
-//			// Create a new dialog instance or reuse logic
-//			LicenseDialog dialog = new LicenseDialog(licenseManager);
-//			dialog.showActivationDialog(s);
-//
-//			// Optional: Refresh license status after dialog closes
-//			licenseStatus = licenseManager.checkLicense();
-//			if (licenseStatus.getType() == LicenseManager.LicenseType.LICENSED) {
-//				s.setTitle("HookeXpert - Licence activée");
-//				// Remove trial banner if it exists (requires logic to find the label in borderPane)
-//			}
-//		});
+		// itemEnterLicense.setOnAction(event -> {
+		// // Create a new dialog instance or reuse logic
+		// LicenseDialog dialog = new LicenseDialog(licenseManager);
+		// dialog.showActivationDialog(s);
+		//
+		// // Optional: Refresh license status after dialog closes
+		// licenseStatus = licenseManager.checkLicense();
+		// if (licenseStatus.getType() == LicenseManager.LicenseType.LICENSED) {
+		// s.setTitle("HookeXpert - Licence activée");
+		// // Remove trial banner if it exists (requires logic to find the label in
+		// borderPane)
+		// }
+		// });
 
+		// License system is disabled - show info message instead
 		itemEnterLicense.setOnAction(event -> {
-			LicenseDialog dialog = new LicenseDialog(licenseManager);
-
-			// Set callback for immediate UI update (NO POPUP)
-			dialog.setOnLicenseActivated(result -> {
-				if (result.isSuccess()) {
-					// Refresh license status
-					licenseStatus = licenseManager.checkLicense();
-
-					// Update UI immediately on JavaFX thread
-					Platform.runLater(() -> {
-						// This will update fenetre_brasure, fenetre_durees, title, etc.
-						updateAdminMode(s, result.isAdmin());
-					});
-				}
-			});
-
-			dialog.showActivationDialog(s);
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Système de licence");
+			alert.setHeaderText("Licence désactivée");
+			alert.setContentText("Le système de licence est désactivé pour un démarrage rapide de l'application.");
+			alert.showAndWait();
 		});
 
 		MenuItem itemAbout = new MenuItem("À propos");
@@ -554,76 +526,77 @@ public class Main extends Application {
 
 	}
 
-
 	/**
 	 * Show the about popup window.
 	 */
-//	private void showAboutPopup(Stage owner) {
-//		Stage popupStage = new Stage();
-//		popupStage.initModality(Modality.WINDOW_MODAL);
-//		popupStage.initOwner(owner);
-//		popupStage.setTitle("À propos de HookeXpert");
-//		popupStage.setResizable(false);
-//
-//		VBox content = new VBox(15);
-//		content.setAlignment(Pos.CENTER);
-//		content.setPrefSize(400, 400); // Slightly larger to accommodate license info
-//
-//		// Load logo
-//		Image logoImage = loadImageSafely(Ressources.LOGO_HE_FULL);
-//		if (logoImage != null) {
-//			ImageView logoView = new ImageView(logoImage);
-//			logoView.setFitWidth(200);
-//			logoView.setPreserveRatio(true);
-//			logoView.setSmooth(true);
-//			content.getChildren().add(logoView);
-//		}
-//
-//		// App version
-//		Text versionText = new Text("Version: " + APP_VERSION);
-//		versionText.setTextAlignment(TextAlignment.CENTER);
-//		versionText.setStyle("-fx-font-weight: bold;");
-//		content.getChildren().add(versionText);
-//
-//		// License status
-//		String licenseText = "";
-//		switch (licenseStatus.getType()) {
-//			case LICENSED:
-//				licenseText = "✓ Version sous licence";
-//				break;
-//			case TRIAL:
-//				licenseText = "⏰ Essai: " + licenseStatus.getDaysRemaining() + " jour(s) restant(s)";
-//				break;
-//			case EXPIRED:
-//				licenseText = "⚠️ Licence requise";
-//				break;
-//		}
-//		Text licenseStatusText = new Text(licenseText);
-//		licenseStatusText.setTextAlignment(TextAlignment.CENTER);
-//		licenseStatusText.setStyle("-fx-font-size: 11px;");
-//		content.getChildren().add(licenseStatusText);
-//
-//		// Copyright
-//		Text copyrightText = new Text("© 2025 HookeXpert. Tous droits réservés.\nDéveloppé par Hooke-Electronics.");
-//		copyrightText.setTextAlignment(TextAlignment.CENTER);
-//		copyrightText.setWrappingWidth(280);
-//		content.getChildren().add(copyrightText);
-//
-//		// OK button
-//		Button okButton = new Button("OK");
-//		okButton.setOnAction(e -> popupStage.close());
-//		okButton.setDefaultButton(true);
-//		content.getChildren().add(okButton);
-//
-//		Scene popupScene = new Scene(content);
-//		URL aboutCss = getClass().getResource("styles/about.css");
-//		if (aboutCss != null) {
-//			popupScene.getStylesheets().add(aboutCss.toExternalForm());
-//			logger.fine("Loaded about dialog CSS.");
-//		}
-//		popupStage.setScene(popupScene);
-//		popupStage.showAndWait();
-//	}
+	// private void showAboutPopup(Stage owner) {
+	// Stage popupStage = new Stage();
+	// popupStage.initModality(Modality.WINDOW_MODAL);
+	// popupStage.initOwner(owner);
+	// popupStage.setTitle("À propos de HookeXpert");
+	// popupStage.setResizable(false);
+	//
+	// VBox content = new VBox(15);
+	// content.setAlignment(Pos.CENTER);
+	// content.setPrefSize(400, 400); // Slightly larger to accommodate license info
+	//
+	// // Load logo
+	// Image logoImage = loadImageSafely(Ressources.LOGO_HE_FULL);
+	// if (logoImage != null) {
+	// ImageView logoView = new ImageView(logoImage);
+	// logoView.setFitWidth(200);
+	// logoView.setPreserveRatio(true);
+	// logoView.setSmooth(true);
+	// content.getChildren().add(logoView);
+	// }
+	//
+	// // App version
+	// Text versionText = new Text("Version: " + APP_VERSION);
+	// versionText.setTextAlignment(TextAlignment.CENTER);
+	// versionText.setStyle("-fx-font-weight: bold;");
+	// content.getChildren().add(versionText);
+	//
+	// // License status
+	// String licenseText = "";
+	// switch (licenseStatus.getType()) {
+	// case LICENSED:
+	// licenseText = "✓ Version sous licence";
+	// break;
+	// case TRIAL:
+	// licenseText = "⏰ Essai: " + licenseStatus.getDaysRemaining() + " jour(s)
+	// restant(s)";
+	// break;
+	// case EXPIRED:
+	// licenseText = "⚠️ Licence requise";
+	// break;
+	// }
+	// Text licenseStatusText = new Text(licenseText);
+	// licenseStatusText.setTextAlignment(TextAlignment.CENTER);
+	// licenseStatusText.setStyle("-fx-font-size: 11px;");
+	// content.getChildren().add(licenseStatusText);
+	//
+	// // Copyright
+	// Text copyrightText = new Text("© 2025 HookeXpert. Tous droits
+	// réservés.\nDéveloppé par Hooke-Electronics.");
+	// copyrightText.setTextAlignment(TextAlignment.CENTER);
+	// copyrightText.setWrappingWidth(280);
+	// content.getChildren().add(copyrightText);
+	//
+	// // OK button
+	// Button okButton = new Button("OK");
+	// okButton.setOnAction(e -> popupStage.close());
+	// okButton.setDefaultButton(true);
+	// content.getChildren().add(okButton);
+	//
+	// Scene popupScene = new Scene(content);
+	// URL aboutCss = getClass().getResource("styles/about.css");
+	// if (aboutCss != null) {
+	// popupScene.getStylesheets().add(aboutCss.toExternalForm());
+	// logger.fine("Loaded about dialog CSS.");
+	// }
+	// popupStage.setScene(popupScene);
+	// popupStage.showAndWait();
+	// }
 
 	// ============================================================
 	// 2. UPDATE THE ABOUT POPUP (Replace showAboutPopup method)
@@ -660,7 +633,8 @@ public class Main extends Application {
 		// ================= LICENSE INFORMATION LOGIC =================
 		VBox licenseBox = new VBox(5);
 		licenseBox.setAlignment(Pos.CENTER);
-		licenseBox.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5; -fx-border-color: #dee2e6; -fx-border-radius: 5;");
+		licenseBox.setStyle(
+				"-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5; -fx-border-color: #dee2e6; -fx-border-radius: 5;");
 
 		Text typeText = new Text();
 		Text expirationText = new Text();
