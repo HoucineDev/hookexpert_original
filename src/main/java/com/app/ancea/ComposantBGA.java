@@ -517,7 +517,8 @@ public class ComposantBGA extends ComposantBilles
 	}
 
 	public void calcul_pcb_z() {
-		this.pcb_z.set_resultat(Outils.nombreChiffreScientifiqueApresVirgule(Double.valueOf(pcb.totale_nominal_reel.getText())));
+		this.pcb_z.set_resultat(
+				Outils.nombreChiffreScientifiqueApresVirgule(Double.valueOf(pcb.totale_nominal_reel.getText())));
 	}
 
 	public void calcul_composant_x() {
@@ -628,15 +629,13 @@ public class ComposantBGA extends ComposantBilles
 		return calcul;
 	}
 
-	public TableView<
-			? extends Resultat_temperature_pcb> get_tableView_temperature_pcb_composant() {
+	public TableView<? extends Resultat_temperature_pcb> get_tableView_temperature_pcb_composant() {
 
 		return pcb.tb_Resultat_temperature_pcb;
 	}
 
 	@SuppressWarnings("unchecked")
-	public TableView<
-			? extends Resultat_temperature> get_tableView_temperature() {
+	public TableView<? extends Resultat_temperature> get_tableView_temperature() {
 
 		for (Resultat_temperature_BGA resultat : paliers_temperatures) {
 			resultat.calcul();
@@ -645,67 +644,53 @@ public class ComposantBGA extends ComposantBilles
 		tv = new TableView<Resultat_temperature_BGA>();
 		tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-		TableColumn<
-				Resultat_temperature_BGA,
-				Number> temperature = new TableColumn<>("Temperatures (°C)");
+		TableColumn<Resultat_temperature_BGA, Number> temperature = new TableColumn<>("Temperatures (°C)");
 		temperature.setCellValueFactory(
 				c -> new SimpleDoubleProperty(c.getValue().getTemperature()));
 		temperature.setMinWidth(80);
 
-		TableColumn<
-				Resultat_temperature_BGA,
-				Number> e1_traction = new TableColumn<>("E1 x (MPa)");
+		TableColumn<Resultat_temperature_BGA, Number> e1_traction = new TableColumn<>("E1 x (MPa)");
 		e1_traction.setCellValueFactory(
 				c -> new SimpleIntegerProperty(
 						(int) c.getValue().getE1_traction()));
 		e1_traction.setMinWidth(100);
 
-		TableColumn<
-				Resultat_temperature_BGA,
-				Number> e1_flexion = new TableColumn<>("E1f (MPa)");
+		TableColumn<Resultat_temperature_BGA, Number> e1_flexion = new TableColumn<>("E1f (MPa)");
 		e1_flexion.setCellValueFactory(
 				c -> new SimpleIntegerProperty(
 						(int) c.getValue().getE1_flexion()));
 		e1_flexion.setMinWidth(100);
 
-		 TableColumn<
-		 Resultat_temperature_BGA,
-		 String> cte1 = new TableColumn<>("CTE1 (m/m/°C)");
-		 cte1.setCellValueFactory(
-		 c -> new SimpleStringProperty(
-		 Outils.nombreChiffreScientifiqueApresVirgule(
-		 c.getValue().getCte1())));
-		 cte1.setMinWidth(20);
-
-//		TableColumn<
-//				Resultat_temperature_BGA,
-//				String> cte2Plus1 = new TableColumn<>("CTE(1+2) (m/m/°C)");
-//		cte2Plus1.setCellValueFactory(
-//				c -> new SimpleStringProperty(
-//						Outils.nombreChiffreScientifiqueApresVirgule(
-//								c.getValue().getCte2Plus1())));
-//		cte2Plus1.setMinWidth(20);
+		TableColumn<Resultat_temperature_BGA, String> cte1 = new TableColumn<>("CTE1 (m/m/°C)");
+		cte1.setCellValueFactory(
+				c -> new SimpleStringProperty(
+						Outils.nombreChiffreScientifiqueApresVirgule(
+								c.getValue().getCte1())));
+		cte1.setMinWidth(20);
 
 		TableColumn<
-				Resultat_temperature_BGA,
-				Number> e2_traction = new TableColumn<>("E2 x (MPa)");
+		Resultat_temperature_BGA,
+		String> cte2Plus1 = new TableColumn<>("CTE(1+2) (m/m/°C)");
+		cte2Plus1.setCellValueFactory(
+		c -> new SimpleStringProperty(
+		Outils.nombreChiffreScientifiqueApresVirgule(
+		c.getValue().getCte2Plus1())));
+		cte2Plus1.setMinWidth(20);
+
+		TableColumn<Resultat_temperature_BGA, Number> e2_traction = new TableColumn<>("E2 x (MPa)");
 		e2_traction.setCellValueFactory(
 				c -> new SimpleIntegerProperty(
 						(int) c.getValue().getE2_traction()));
 		e2_traction.setMinWidth(100);
 
-		TableColumn<
-				Resultat_temperature_BGA,
-				Number> e2_flexion = new TableColumn<>("E2 f (MPa)");
+		TableColumn<Resultat_temperature_BGA, Number> e2_flexion = new TableColumn<>("E2 f (MPa)");
 		e2_flexion.setCellValueFactory(
 				c -> new SimpleIntegerProperty(
 						(int) c.getValue().getE2_flexion()));
 
 		e2_flexion.setMinWidth(100);
 
-		TableColumn<
-				Resultat_temperature_BGA,
-				String> cte2 = new TableColumn<>("CTE2 (m/m/°C)");
+		TableColumn<Resultat_temperature_BGA, String> cte2 = new TableColumn<>("CTE2 (m/m/°C)");
 		cte2.setCellValueFactory(
 				c -> new SimpleStringProperty(
 						Outils.nombreChiffreScientifiqueApresVirgule(
@@ -717,8 +702,8 @@ public class ComposantBGA extends ComposantBilles
 				temperature,
 				e1_traction,
 				e1_flexion,
-				 cte1,
-//				cte2Plus1,
+				cte1,
+				cte2Plus1,
 				e2_traction,
 				e2_flexion,
 				cte2);
@@ -738,28 +723,22 @@ public class ComposantBGA extends ComposantBilles
 		TableView<Propriete> tvProprietes = new TableView<Propriete>();
 		tvProprietes.setEditable(true);
 
-		TableColumn<
-				Propriete,
-				String> colonneVariable = new TableColumn<Propriete, String>(
-						"Proprietes");
+		TableColumn<Propriete, String> colonneVariable = new TableColumn<Propriete, String>(
+				"Proprietes");
 
 		colonneVariable.setMinWidth(120);
 		colonneVariable
-.setCellValueFactory(c -> c.getValue().get_nom_variable());
+				.setCellValueFactory(c -> c.getValue().get_nom_variable());
 
-		TableColumn<
-				Propriete,
-				String> colonneResultat = new TableColumn<Propriete, String>(
-						"Resultats");
+		TableColumn<Propriete, String> colonneResultat = new TableColumn<Propriete, String>(
+				"Resultats");
 		colonneResultat.setEditable(true);
 		colonneResultat.setMinWidth(90);
 		colonneResultat.setCellValueFactory(c -> c.getValue().get_resultat());
 		colonneResultat.setCellFactory(TextFieldTableCell.forTableColumn());
 		colonneResultat
 				.setOnEditCommit((CellEditEvent<Propriete, String> event) -> {
-					TablePosition<
-							Propriete,
-							String> position = event.getTablePosition();
+					TablePosition<Propriete, String> position = event.getTablePosition();
 
 					String nouvelleValeur = event.getNewValue();
 
